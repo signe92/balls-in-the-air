@@ -6,13 +6,20 @@ namespace BoldeILuften;
 
 public class Game1 : Game
 {
-    private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
+    // tegnes og skaleres i denne størelse og skaleres derop.
+    public const int GameWidth = 320;
+    public const int GameHeight = 180;
+    private const int Scale = 4; // hvor mnage gange det forstørres på skærmen 
+    private Texture2D _pixel; // bruges til firkanterne 
+    private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
+    private SpriteBatch _spriteBatch; // tegner det 2D billeder på skærmen 
 
     public Game1()
     {
-        _graphics = new GraphicsDeviceManager(this);
-        Content.RootDirectory = "Content";
+        _graphics = new GraphicsDeviceManager(this); // åbner vinduet for spillet
+        _graphics.PreferredBackBufferWidth = GameWidth * Scale; // 1200 - bredden 
+        _graphics.PreferredBackBufferHeight = GameWidth * Scale; // 720 - højden 
+        Content.RootDirectory = "Content"; // lyden ligger i content mappen 
         IsMouseVisible = true;
     }
 
@@ -20,19 +27,20 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
 
-        base.Initialize();
+        base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
 
-    protected override void LoadContent()
+    protected override void LoadContent() // køre den kun en gang og indlæser grafikken, lyden og fonten 
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _spriteBatch = new SpriteBatch(GraphicsDevice); // tegneværktøjet 
+        _pixel = new Texture2D(GraphicsDevice, 1, 1);
+        _pixel.SetData(new[] { Color.White });
 
-        // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) // spillet lukker hvis man trykker 'back' på controlleren eller 'escape'
             Exit();
 
         // TODO: Add your update logic here
@@ -40,12 +48,17 @@ public class Game1 : Game
         base.Update(gameTime);
     }
 
-    protected override void Draw(GameTime gameTime)
+    protected override void Draw(GameTime gameTime) // her tegnes, ikke spil logik
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(new Color(20, 24, 46));
 
-        // TODO: Add your drawing code here
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp,
+        transformMatrix: Matrix.CreateScale(Scale));
 
-        base.Draw(gameTime);
+        _spriteBatch.Draw(_pixel, new Rectangle(10, 10, 32, 32), Color.Red);
+
+        _spriteBatch.End(); // Afslutter og sender det til skærmen 
+
+        base.Draw(gameTime); // køres egen
     }
 }
