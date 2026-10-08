@@ -15,6 +15,7 @@ public class Game1 : Game
 
     private const float MaxSideSpeed = 100f; // det her er hvor hurtigt bolden flyvr til siden efter et hit
     private Texture2D _pixel; // bruges til firkanterne 
+    private SpriteFont _font; // Pixel-fonten til teksten
     private Player _player; // vores spiller
     private List<Ball> _balls = new List<Ball>(); // alle boldene i spillet som starter som en tom liste
     private BallSpawner _spawner = new BallSpawner(); // sender nye bolde ind med tiden
@@ -69,6 +70,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice); // tegneværktøjet 
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
+        _font = Content.Load<SpriteFont>("font");
 
     }
 
@@ -179,6 +181,7 @@ public class Game1 : Game
             foreach (Ball ball in _balls)
             ball.Draw(_spriteBatch, _pixel);
         }
+        _spriteBatch.DrawString(_font, "Hej Canada!", new Vector2(10, 10), Color.White);
 
         _spriteBatch.End();
         base.Draw(gameTime);
