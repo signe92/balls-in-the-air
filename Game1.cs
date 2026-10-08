@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic; // giver en liste der kan vokse og skrumpe
 
 namespace BoldeILuften;
 
@@ -15,7 +16,7 @@ public class Game1 : Game
     private const float MaxSideSpeed = 100f; // det her er hvor hurtigt bolden flyvr til siden efter et hit
     private Texture2D _pixel; // bruges til firkanterne 
     private Player _player; // vores spiller
-    private Ball _ball; // vores bold, kun en lige nu
+    private List<Ball> _balls = new List<Ball>(); // alle boldene i spillet som starter som en tom liste
 
     private int _lives = 3; // antal liv 
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
@@ -30,16 +31,19 @@ public class Game1 : Game
         IsMouseVisible = true;
     }
 
-    private void ResetBall()
+    private void SpawnBall()
     {
-        _ball = new Ball(new Vector2(GameWidth / 2 - Ball.Size / 2, 20), new Vector2(40, 0));
+        int x = System.Random.Shared.Next(0, GameWidth - Ball.Size); // tilfældigt x mellem højre og venstre kant
+        _balls.Add(new Ball(new Vector2(x, 20), new Vector2(40, 0)));
     }
 
     protected override void Initialize()
     {
         _player = new Player(new Vector2(GameWidth / 2 - Player.Width / 2, 140));
 
-        ResetBall(); // opretter den første bold
+        SpawnBall(); // opretter den første bold
+        SpawnBall();
+        SpawnBall(); 
         base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
 
@@ -60,29 +64,32 @@ public class Game1 : Game
         KeyboardState keys = Keyboard.GetState();
         _player.Update(dt, keys); 
 
-        _ball.Update(dt); // bolden falder
-
-        if (_ball.Bounds.Intersects(_player.Bounds) && _ball.Velocity.Y > 0) // hvis bolden rammer spilleren reagere den kun hvis bolden er på vej ned
+        foreach (Ball ball in _balls) // her går den igennem listen en af gangen
         {
-            _ball.Velocity.Y = -BounceSpeed; // her sender den bolden op igen (negativ y - opad)
+            ball.Update(dt);
 
-            float ballCenter = _ball.Position.X + Ball.Size / 2f; // finder midten af bolden og midten af spilleren 
-            float playerCenter = _player.Position.X + Player.Width / 2f;
+            if (ball.Bounds.Intersects(_player.Bounds) && ball.Velocity.Y > 0)
+            {
+                ball.Velocity.Y = -BounceSpeed;
 
-            float offset = (ballCenter - playerCenter) / (Player.Width / 2f); // fra spillerens midt punkt, ramte bolden. -1 er venstre, 0 er midten og 1 er højre
+                float ballcenter = ball.Position.X + Ball.Size / 2f;
+                float playerCenter = _player.Position.X + Player.Width / 2f;
+                float offset = (ballcenter - playerCenter) / (Player.Width / 2f);
 
-            _ball.Velocity.X = offset * MaxSideSpeed; // nu længere ude på siden, nu hurtigere flyver bolden til siden 
+                ball.Velocity.X = offset * MaxSideSpeed;
+            }
         }
 
-        if (_ball.Position.Y > GameHeight) // hvis bolden falder ud af skærmen 
-        {
-            _lives --; // trækker et af livene 
-            ResetBall(); // starter en ny bold
+        int missed = _balls.RemoveAll(b => b.Position.Y > GameHeight); // fjerne alle boldene, der faldet ud af bunden og trækker et liv pr. bold
+        _lives -= missed;
 
-            if (_lives <= 0) // game over midlertidig
-            Exit();
-        }
-        Window.Title = $"Liv: {_lives}"; // viser livene i vinduets titel
+        if (_balls.Count == 0)
+        SpawnBall();
+
+        if (_lives <= 0)
+        Exit();
+
+        Window.Title = $"Liv: {_lives}";
 
         base.Update(gameTime);
     }
@@ -96,7 +103,8 @@ public class Game1 : Game
 
         _player.Draw(_spriteBatch, _pixel); // spilleren tegner sig selv
 
-        _ball.Draw(_spriteBatch, _pixel);
+        foreach (Ball ball in _balls)
+        ball.Draw(_spriteBatch, _pixel);
 
         _spriteBatch.End(); // afslutter og sender det til skærmen 
 
