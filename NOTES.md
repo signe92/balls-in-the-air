@@ -13,3 +13,14 @@
 ##Hvad overraskede mig?
 - Jeg havde ikke tænkt over at et spil er bare en løkke der kører Update og Draw 60 gange i sekundet, men det giver mening når man får det i hænderne selv. 
 - Blev overasket over at tyngdekraften er bare to linjer kode, hvor det stiger lidt hver frame og farten flytter bolden
+
+#Dag 2
+
+##Hvad var svært?
+- Highscoren blev gemt, men ikke vist i menuen, så det tog nogle forsøg at få det til at virke
+
+##Hvad har jeg lært?
+- HighscoreStore og BallSpawner har hvert sit ansvar så resten af spillet ikke behøver vide, hvordan de virker? 
+
+##Hvad overraskede mig?
+- Hvorfor gemmes data i ProgramData i stedet for i projektmappen? Og hvorfor må spil og programmer ikke gemme data direkte i deres egen projektmappe?
