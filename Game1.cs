@@ -20,6 +20,7 @@ public class Game1 : Game
     private BallSpawner _spawner = new BallSpawner(); // sender nye bolde ind med tiden
 
     private int _lives = 3; // antal liv 
+    private int _score; // antal point
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
     private SpriteBatch _spriteBatch; // tegner det 2D billeder på skærmen 
 
@@ -70,6 +71,7 @@ public class Game1 : Game
             if (ball.Bounds.Intersects(_player.Bounds) && ball.Velocity.Y > 0)
             {
                 ball.Velocity.Y = -BounceSpeed;
+                _score++; // 1 point for hvert hit
 
                 float ballcenter = ball.Position.X + Ball.Size / 2f;
                 float playerCenter = _player.Position.X + Player.Width / 2f;
@@ -88,7 +90,7 @@ public class Game1 : Game
         if (_lives <= 0)
         Exit();
 
-        Window.Title = $"Liv: {_lives}";
+        Window.Title = $"Point: {_score} Liv: {_lives}";
 
         base.Update(gameTime);
     }
