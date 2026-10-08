@@ -12,6 +12,7 @@ public class Game1 : Game
     private const int Scale = 4; // hvor mnage gange det forstørres på skærmen 
     private Texture2D _pixel; // bruges til firkanterne 
     private Player _player; // vores spiller
+    private Ball _ball; // vores bold, kun en lige nu
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
     private SpriteBatch _spriteBatch; // tegner det 2D billeder på skærmen 
 
@@ -27,6 +28,8 @@ public class Game1 : Game
     protected override void Initialize()
     {
         _player = new Player(new Vector2(GameWidth / 2 - Player.Width / 2, 140));
+
+        _ball = new Ball(new Vector2(GameWidth / 2 - Ball.Size / 2, 20), new Vector2(40, 0)); // starter midten på skærmen, derefter lidt fart til højre men ingen fart nedad
 
         base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
@@ -48,6 +51,8 @@ public class Game1 : Game
         KeyboardState keys = Keyboard.GetState();
         _player.Update(dt, keys); 
 
+        _ball.Update(dt); // bolden falder
+
         base.Update(gameTime);
     }
 
@@ -59,6 +64,8 @@ public class Game1 : Game
         transformMatrix: Matrix.CreateScale(Scale));
 
         _player.Draw(_spriteBatch, _pixel); // spilleren tegner sig selv
+
+        _ball.Draw(_spriteBatch, _pixel);
 
         _spriteBatch.End(); // afslutter og sender det til skærmen 
 
