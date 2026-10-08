@@ -16,6 +16,8 @@ public class Game1 : Game
     private Texture2D _pixel; // bruges til firkanterne 
     private Player _player; // vores spiller
     private Ball _ball; // vores bold, kun en lige nu
+
+    private int _lives = 3; // antal liv 
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
     private SpriteBatch _spriteBatch; // tegner det 2D billeder på skærmen 
 
@@ -28,12 +30,16 @@ public class Game1 : Game
         IsMouseVisible = true;
     }
 
+    private void ResetBall()
+    {
+        _ball = new Ball(new Vector2(GameWidth / 2 - Ball.Size / 2, 20), new Vector2(40, 0));
+    }
+
     protected override void Initialize()
     {
         _player = new Player(new Vector2(GameWidth / 2 - Player.Width / 2, 140));
 
-        _ball = new Ball(new Vector2(GameWidth / 2 - Ball.Size / 2, 20), new Vector2(40, 0)); // starter midten på skærmen, derefter lidt fart til højre men ingen fart nedad
-
+        ResetBall(); // opretter den første bold
         base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
 
@@ -61,12 +67,22 @@ public class Game1 : Game
             _ball.Velocity.Y = -BounceSpeed; // her sender den bolden op igen (negativ y - opad)
 
             float ballCenter = _ball.Position.X + Ball.Size / 2f; // finder midten af bolden og midten af spilleren 
-            float playerCenter = _player.Positions.X + Player.Width / 2f;
+            float playerCenter = _player.Position.X + Player.Width / 2f;
 
             float offset = (ballCenter - playerCenter) / (Player.Width / 2f); // fra spillerens midt punkt, ramte bolden. -1 er venstre, 0 er midten og 1 er højre
 
             _ball.Velocity.X = offset * MaxSideSpeed; // nu længere ude på siden, nu hurtigere flyver bolden til siden 
         }
+
+        if (_ball.Position.Y > GameHeight) // hvis bolden falder ud af skærmen 
+        {
+            _lives --; // trækker et af livene 
+            ResetBall(); // starter en ny bold
+
+            if (_lives <= 0) // game over midlertidig
+            Exit();
+        }
+        Window.Title = $"Liv: {_lives}"; // viser livene i vinduets titel
 
         base.Update(gameTime);
     }
