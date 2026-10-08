@@ -23,12 +23,14 @@ public class Game1 : Game
     private int _score; // antal point
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
     private SpriteBatch _spriteBatch; // tegner det 2D billeder på skærmen 
+    private GameState _state = GameState.Menu; // spillet starter i menuen
+    private KeyboardState _previousKeys; // tastaturet fra sidste frame
 
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this); // åbner vinduet for spillet
         _graphics.PreferredBackBufferWidth = GameWidth * Scale; // 1200 - bredden 
-        _graphics.PreferredBackBufferHeight = GameWidth * Scale; // 720 - højden 
+        _graphics.PreferredBackBufferHeight = GameHeight * Scale; // 720 - højden 
         Content.RootDirectory = "Content"; // lyden ligger i content mappen 
         IsMouseVisible = true;
     }
@@ -38,11 +40,24 @@ public class Game1 : Game
         _balls.Add(BallSpawner.CreateBall()); // ved hvordan en bold laves
     }
 
+    private bool WasPressed(KeyboardState keys, Keys key) // kun sandt i den frame hvor tasten bliver trykket ned ikke mens den bliver holdt nede
+    {
+        return keys.IsKeyDown(key) && _previousKeys.IsKeyUp(key);
+    }
+
+    private void StartNewGame()
+    {
+        _score = 0;
+        _lives = 3;
+        _balls.Clear(); // fjerner alle gamle bolde
+        _spawner = new BallSpawner(); // ny spawner så tempoet starter forfra
+        _player = new Player(new Vector2(GameWidth / 2 - Player.Width / 2, 140));
+        SpawnBall(); // første bold
+        _state = GameState.Playing;
+    }
+
     protected override void Initialize()
     {
-        _player = new Player(new Vector2(GameWidth / 2 - Player.Width / 2, 140));
-
-        SpawnBall(); // opretter den første bold
         base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
 
@@ -56,59 +71,105 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) // spillet lukker hvis man trykker 'back' på controlleren eller 'escape'
+        KeyboardState keys = Keyboard.GetState();
+
+        if (keys.IsKeyDown(Keys.Escape)) // spillet lukker hvis man trykker 'back' på controlleren eller 'escape'
             Exit();
 
-        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds; // tiden fra den sidste frame i sekunder 
-        KeyboardState keys = Keyboard.GetState();
-        _player.Update(dt, keys); 
-        _spawner.Update(dt, _balls); // tilføjer en ny bold hvis der er tid
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds; // tiden fra sidste frame
 
-        foreach (Ball ball in _balls) // her går den igennem listen en af gangen
+        switch (_state) // kører den logik der hører til skærmen man er pā
+        {
+            case GameState.Menu:
+            UpdateMenu(keys);
+            break;
+
+            case GameState.Playing:
+            UpdatePlaying(dt, keys);
+            break;
+
+            case GameState.GameOver:
+            UpdateGameOver(keys);
+            break;
+        }
+
+        _previousKeys = keys; // husker tastaturet til næste frame
+        base.Update(gameTime);
+    }
+
+    private void UpdateMenu(KeyboardState keys)
+    {
+        Window.Title = "Bolde i luften - tryk mellemrum for at starte";
+
+        if (WasPressed(keys, Keys.Space))
+        StartNewGame();
+    }
+
+    private void UpdatePlaying(float dt, KeyboardState keys)
+    {
+        _player.Update(dt, keys);
+        _spawner.Update(dt, _balls);
+
+        foreach (Ball ball in _balls)
         {
             ball.Update(dt);
 
             if (ball.Bounds.Intersects(_player.Bounds) && ball.Velocity.Y > 0)
             {
+                
                 ball.Velocity.Y = -BounceSpeed;
-                _score++; // 1 point for hvert hit
+                _score++;
 
-                float ballcenter = ball.Position.X + Ball.Size / 2f;
+                float ballCenter = ball.Position.X + Ball.Size / 2f;
                 float playerCenter = _player.Position.X + Player.Width / 2f;
-                float offset = (ballcenter - playerCenter) / (Player.Width / 2f);
-
+                float offset = (ballCenter - playerCenter) / (Player.Width / 2f);
                 ball.Velocity.X = offset * MaxSideSpeed;
             }
         }
 
-        int missed = _balls.RemoveAll(b => b.Position.Y > GameHeight); // fjerne alle boldene, der faldet ud af bunden og trækker et liv pr. bold
+        int missed = _balls.RemoveAll(b => b.Position.Y > GameHeight);
         _lives -= missed;
 
         if (_balls.Count == 0)
         SpawnBall();
 
-        if (_lives <= 0)
-        Exit();
+        if (_lives <= 0) // i stedet for at spillet lukker så skifter det over til game over
+        _state = GameState.GameOver;
 
         Window.Title = $"Point: {_score} Liv: {_lives}";
+    }
 
-        base.Update(gameTime);
+    private void UpdateGameOver(KeyboardState keys)
+    {
+        Window.Title = $"GAME OVER! Point: {_score} - tryk mellemrum for at proeve igen";
+
+        if (WasPressed(keys, Keys.Space))
+        StartNewGame();
     }
 
     protected override void Draw(GameTime gameTime) // her tegnes, ikke spil logik
     {
-        GraphicsDevice.Clear(new Color(20, 24, 46));
+        Color background = _state switch
+        {
+            GameState.Menu => new Color(20, 24, 46), 
+            GameState.Playing => new Color(20, 24, 46),
+            GameState.GameOver => new Color(70, 20, 30),
+            _ => Color.Black
+        };
+        GraphicsDevice.Clear(background);
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp,
         transformMatrix: Matrix.CreateScale(Scale));
 
-        _player.Draw(_spriteBatch, _pixel); // spilleren tegner sig selv
+        if (_state != GameState.Menu)
+        {
+            _player.Draw(_spriteBatch, _pixel);
 
-        foreach (Ball ball in _balls)
-        ball.Draw(_spriteBatch, _pixel);
+            foreach (Ball ball in _balls)
+            ball.Draw(_spriteBatch, _pixel);
+        }
 
-        _spriteBatch.End(); // afslutter og sender det til skærmen 
-
-        base.Draw(gameTime); // køres egen
+        _spriteBatch.End();
+        base.Draw(gameTime);
     }
 }
