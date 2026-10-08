@@ -10,6 +10,9 @@ public class Game1 : Game
     public const int GameWidth = 320;
     public const int GameHeight = 180;
     private const int Scale = 4; // hvor mnage gange det forstørres på skærmen 
+    private const float BounceSpeed = 180f; // det her er hvor hårdt bolten bliver sendt op, når den rammer spilleren 
+
+    private const float MaxSideSpeed = 100f; // det her er hvor hurtigt bolden flyvr til siden efter et hit
     private Texture2D _pixel; // bruges til firkanterne 
     private Player _player; // vores spiller
     private Ball _ball; // vores bold, kun en lige nu
@@ -52,6 +55,18 @@ public class Game1 : Game
         _player.Update(dt, keys); 
 
         _ball.Update(dt); // bolden falder
+
+        if (_ball.Bounds.Intersects(_player.Bounds) && _ball.Velocity.Y > 0) // hvis bolden rammer spilleren reagere den kun hvis bolden er på vej ned
+        {
+            _ball.Velocity.Y = -BounceSpeed; // her sender den bolden op igen (negativ y - opad)
+
+            float ballCenter = _ball.Position.X + Ball.Size / 2f; // finder midten af bolden og midten af spilleren 
+            float playerCenter = _player.Positions.X + Player.Width / 2f;
+
+            float offset = (ballCenter - playerCenter) / (Player.Width / 2f); // fra spillerens midt punkt, ramte bolden. -1 er venstre, 0 er midten og 1 er højre
+
+            _ball.Velocity.X = offset * MaxSideSpeed; // nu længere ude på siden, nu hurtigere flyver bolden til siden 
+        }
 
         base.Update(gameTime);
     }
