@@ -11,6 +11,7 @@ public class Game1 : Game
     public const int GameHeight = 180;
     private const int Scale = 4; // hvor mnage gange det forstørres på skærmen 
     private Texture2D _pixel; // bruges til firkanterne 
+    private Player _player; // vores spiller
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
     private SpriteBatch _spriteBatch; // tegner det 2D billeder på skærmen 
 
@@ -25,7 +26,7 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
+        _player = new Player(new Vector2(GameWidth / 2 - Player.Width / 2, 140));
 
         base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
@@ -43,7 +44,9 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) // spillet lukker hvis man trykker 'back' på controlleren eller 'escape'
             Exit();
 
-        // TODO: Add your update logic here
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds; // tiden fra den sidste frame i sekunder 
+        KeyboardState keys = Keyboard.GetState();
+        _player.Update(dt, keys); 
 
         base.Update(gameTime);
     }
@@ -55,9 +58,9 @@ public class Game1 : Game
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp,
         transformMatrix: Matrix.CreateScale(Scale));
 
-        _spriteBatch.Draw(_pixel, new Rectangle(10, 10, 32, 32), Color.Red);
+        _player.Draw(_spriteBatch, _pixel); // spilleren tegner sig selv
 
-        _spriteBatch.End(); // Afslutter og sender det til skærmen 
+        _spriteBatch.End(); // afslutter og sender det til skærmen 
 
         base.Draw(gameTime); // køres egen
     }
