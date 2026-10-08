@@ -21,6 +21,8 @@ public class Game1 : Game
 
     private int _lives = 3; // antal liv 
     private int _score; // antal point
+    private HighscoreStore _highscoreStore = new HighscoreStore(); // gemmer og henter highscore
+    private int _highscore; // bedste score indtil videre
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
     private SpriteBatch _spriteBatch; // tegner det 2D billeder på skærmen 
     private GameState _state = GameState.Menu; // spillet starter i menuen
@@ -29,7 +31,7 @@ public class Game1 : Game
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this); // åbner vinduet for spillet
-        _graphics.PreferredBackBufferWidth = GameWidth * Scale; // 1200 - bredden 
+        _graphics.PreferredBackBufferWidth = GameWidth * Scale; // 1280 - bredden 
         _graphics.PreferredBackBufferHeight = GameHeight * Scale; // 720 - højden 
         Content.RootDirectory = "Content"; // lyden ligger i content mappen 
         IsMouseVisible = true;
@@ -58,6 +60,7 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        _highscore = _highscoreStore.Load(); // henter det sidste highscore
         base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
 
@@ -99,7 +102,7 @@ public class Game1 : Game
 
     private void UpdateMenu(KeyboardState keys)
     {
-        Window.Title = "Bolde i luften - tryk mellemrum for at starte";
+        Window.Title = $"Bolde i luften - tryk mellemrum for at starte (Highscore: {_highscore})";
 
         if (WasPressed(keys, Keys.Space))
         StartNewGame();
@@ -133,15 +136,23 @@ public class Game1 : Game
         if (_balls.Count == 0)
         SpawnBall();
 
-        if (_lives <= 0) // i stedet for at spillet lukker så skifter det over til game over
-        _state = GameState.GameOver;
+        if (_lives <= 0) // skifter over til game over
+        {
+            _state = GameState.GameOver;
 
-        Window.Title = $"Point: {_score} Liv: {_lives}";
+            if (_score > _highscore) // gemmer den nye rekord
+            {
+                _highscore = _score;
+                _highscoreStore.Save(_highscore);
+            }
+        }
+
+        Window.Title = $"Point: {_score} Liv: {_lives} Highscore: {_highscore}";
     }
 
     private void UpdateGameOver(KeyboardState keys)
     {
-        Window.Title = $"GAME OVER! Point: {_score} - tryk mellemrum for at proeve igen";
+        Window.Title = $"GAME OVER! Point: {_score} Highscore: {_highscore} - tryk mellemrum for at proeve igen";
 
         if (WasPressed(keys, Keys.Space))
         StartNewGame();
