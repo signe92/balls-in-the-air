@@ -34,7 +34,9 @@ public class Game1 : Game
     private void SpawnBall()
     {
         int x = System.Random.Shared.Next(0, GameWidth - Ball.Size); // tilfældigt x mellem højre og venstre kant
-        _balls.Add(new Ball(new Vector2(x, 20), new Vector2(40, 0)));
+        BallType[] types = System.Enum.GetValues<BallType>();
+        BallType type = types[System.Random.Shared.Next(types.Length)];
+        _balls.Add(new Ball(new Vector2(x, 20), new Vector2(40, 0), type));
     }
 
     protected override void Initialize()
