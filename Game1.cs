@@ -17,6 +17,7 @@ public class Game1 : Game
     private Texture2D _pixel; // bruges til firkanterne 
     private Player _player; // vores spiller
     private List<Ball> _balls = new List<Ball>(); // alle boldene i spillet som starter som en tom liste
+    private BallSpawner _spawner = new BallSpawner(); // sender nye bolde ind med tiden
 
     private int _lives = 3; // antal liv 
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
@@ -33,10 +34,7 @@ public class Game1 : Game
 
     private void SpawnBall()
     {
-        int x = System.Random.Shared.Next(0, GameWidth - Ball.Size); // tilfældigt x mellem højre og venstre kant
-        BallType[] types = System.Enum.GetValues<BallType>();
-        BallType type = types[System.Random.Shared.Next(types.Length)];
-        _balls.Add(new Ball(new Vector2(x, 20), new Vector2(40, 0), type));
+        _balls.Add(BallSpawner.CreateBall()); // ved hvordan en bold laves
     }
 
     protected override void Initialize()
@@ -44,8 +42,6 @@ public class Game1 : Game
         _player = new Player(new Vector2(GameWidth / 2 - Player.Width / 2, 140));
 
         SpawnBall(); // opretter den første bold
-        SpawnBall();
-        SpawnBall(); 
         base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
 
@@ -65,6 +61,7 @@ public class Game1 : Game
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds; // tiden fra den sidste frame i sekunder 
         KeyboardState keys = Keyboard.GetState();
         _player.Update(dt, keys); 
+        _spawner.Update(dt, _balls); // tilføjer en ny bold hvis der er tid
 
         foreach (Ball ball in _balls) // her går den igennem listen en af gangen
         {
