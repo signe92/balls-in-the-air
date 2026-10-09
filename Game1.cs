@@ -24,6 +24,7 @@ public class Game1 : Game
     private int _score; // antal point
     private HighscoreStore _highscoreStore = new HighscoreStore(); // gemmer og henter highscore
     private int _highscore; // bedste score indtil videre
+    private bool _isNewHighscore; // sandt hvis sidste spil slår rekorden
     private GraphicsDeviceManager _graphics; // styrer vinduet og grafikkortet
     private SpriteBatch _spriteBatch; // tegner det 2D billeder på skærmen 
     private GameState _state = GameState.Menu; // spillet starter i menuen
@@ -52,6 +53,7 @@ public class Game1 : Game
     {
         _score = 0;
         _lives = 3;
+        _isNewHighscore = false;
         _balls.Clear(); // fjerner alle gamle bolde
         _spawner = new BallSpawner(); // ny spawner så tempoet starter forfra
         _player = new Player(new Vector2(GameWidth / 2 - Player.Width / 2, 140));
@@ -62,6 +64,7 @@ public class Game1 : Game
     protected override void Initialize()
     {
         _highscore = _highscoreStore.Load(); // henter det sidste highscore
+        Window.Title = "Balls in the Air";  
         base.Initialize(); // kører egen opsætning og derfra kalder også LoadContent
     }
 
@@ -104,8 +107,6 @@ public class Game1 : Game
 
     private void UpdateMenu(KeyboardState keys)
     {
-        Window.Title = $"Bolde i luften - tryk mellemrum for at starte (Highscore: {_highscore})";
-
         if (WasPressed(keys, Keys.Space))
         StartNewGame();
     }
@@ -146,43 +147,85 @@ public class Game1 : Game
             {
                 _highscore = _score;
                 _highscoreStore.Save(_highscore);
+                _isNewHighscore = true;
             }
         }
 
-        Window.Title = $"Point: {_score} Liv: {_lives} Highscore: {_highscore}";
     }
 
     private void UpdateGameOver(KeyboardState keys)
     {
-        Window.Title = $"GAME OVER! Point: {_score} Highscore: {_highscore} - tryk mellemrum for at proeve igen";
-
         if (WasPressed(keys, Keys.Space))
         StartNewGame();
     }
 
+    private void DrawCentered(string text, int y, Color color)
+    {
+        Vector2 size = _font.MeasureString(text); // bredden og højden på teksten
+        int x = (int)((GameWidth - size.X) / 2); // teksten står i midten
+        _spriteBatch.DrawString(_font, text, new Vector2(x, y), color);
+    }
+
+    private void DrawMenu()
+    {
+        DrawCentered("BALLS IN THE AIR", 50, Color.Gold);
+        DrawCentered("Hold livets bolde i luften", 70, Color.White);
+        DrawCentered("Piletaster eller A/D", 100, Color.LightGray);
+        DrawCentered("Tryk MELLEMRUM", 125, Color.White);
+        DrawCentered($"Highscore: {_highscore}", 155, Color.Gold);
+    }
+
+    private void DrawPlaying()
+    {
+        _player.Draw(_spriteBatch, _pixel);
+
+        foreach (Ball ball in _balls)
+        ball.Draw(_spriteBatch, _pixel);
+
+        _spriteBatch.DrawString(_font, $"Point: {_score}", new Vector2(4, 4), Color.White); // laver point i højre side
+
+        for (int i = 0; i < _lives; i++) // laver et lille firkantet hjerte pr liv i højre felt
+        {
+            int x = GameWidth - 12 - i * 12;
+            _spriteBatch.Draw(_pixel, new Rectangle(x, 4, 8, 8), Color.HotPink);
+        }
+
+    }
+
+    private void DrawGameOver()
+    {
+        _spriteBatch.Draw(_pixel, new Rectangle(0, 0, GameWidth, GameHeight), Color.Black * 0.6f);
+
+        DrawCentered("GAME OVER", 55, Color.Red);
+        DrawCentered($"Point: {_score}", 80, Color.White);
+
+        if (_isNewHighscore)
+        DrawCentered("NY HIGHSCORE!", 100, Color.Gold);
+
+        DrawCentered("Tryk MELLEMRUM for at prøve igen", 130, Color.White);
+    }
+
     protected override void Draw(GameTime gameTime) // her tegnes, ikke spil logik
     {
-        Color background = _state switch
+        GraphicsDevice.Clear(new Color(20, 24, 46));
+
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Matrix.CreateScale(Scale));
+
+        switch (_state)
         {
-            GameState.Menu => new Color(20, 24, 46), 
-            GameState.Playing => new Color(20, 24, 46),
-            GameState.GameOver => new Color(70, 20, 30),
-            _ => Color.Black
-        };
-        GraphicsDevice.Clear(background);
+            case GameState.Menu:
+            DrawMenu();
+            break;
 
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp,
-        transformMatrix: Matrix.CreateScale(Scale));
+            case GameState.Playing:
+            DrawPlaying();
+            break;
 
-        if (_state != GameState.Menu)
-        {
-            _player.Draw(_spriteBatch, _pixel);
-
-            foreach (Ball ball in _balls)
-            ball.Draw(_spriteBatch, _pixel);
+            case GameState.GameOver:
+            DrawPlaying();
+            DrawGameOver();
+            break;
         }
-        _spriteBatch.DrawString(_font, "Hej Canada!", new Vector2(10, 10), Color.White);
-
         _spriteBatch.End();
         base.Draw(gameTime);
     }
