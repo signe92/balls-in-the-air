@@ -25,7 +25,7 @@ public class Player // her holder klassen alt ansvaret om spilleren
         if (keys.IsKeyDown(Keys.Left) || keys.IsKeyDown(Keys.A))
         Position.X -= Speed * dt;
 
-        if (keys.IsKeyDown(Keys.Right) || keys.IsKeyDown(Keys.A))
+        if (keys.IsKeyDown(Keys.Right) || keys.IsKeyDown(Keys.D))
         Position.X += Speed * dt;
 
         Position.X = MathHelper.Clamp(Position.X, 0, Game1.GameWidth - Width);

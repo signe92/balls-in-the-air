@@ -35,4 +35,4 @@
 - Matrix-tranformationer: rækkefølgen betyder noget, først flyt og derefter forstør
 
 ##Hvad overraskede mig?
-- små ændringe til ting kan gøre en stor forkskel for spilleren såsom Game feel / juice som er små effekter, der ikke ændrer reglerne, men gør spillet meget mere tilfredsstillende.
+- Lille rystelse gjorde spillet meget sjovere, selvom reglerne var det samme
