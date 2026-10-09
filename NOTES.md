@@ -24,3 +24,15 @@
 
 ##Hvad overraskede mig?
 - Hvorfor gemmes data i ProgramData i stedet for i projektmappen? Og hvorfor må spil og programmer ikke gemme data direkte i deres egen projektmappe?
+
+#Day 3
+
+##Hvad var svært?
+- Menuen overlappede, y koordinater skal gå opad, og hver tekstlinje fylder 8 pixels
+
+##Hvad har jeg lært?
+- MeasureString til at centrere tekst
+- Matrix-tranformationer: rækkefølgen betyder noget, først flyt og derefter forstør
+
+##Hvad overraskede mig?
+- små ændringe til ting kan gøre en stor forkskel for spilleren såsom Game feel / juice som er små effekter, der ikke ændrer reglerne, men gør spillet meget mere tilfredsstillende.
