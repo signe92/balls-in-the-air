@@ -49,11 +49,21 @@ public class Ball // klassen her har ansvaret for en bold
         BallType.Venner => Color.CornflowerBlue,
         BallType.Soevn => Color.Orange,
         BallType.Arbejde => Color.MediumPurple,
-        BallType.Foedselsdage => Color.HotPink,
+        BallType.Foedselsdage => Color.Gold,
         _ => Color.White // betyder alt andet
     };
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel) // tegner bolden (ændres senere)
     {
         spriteBatch.Draw(pixel, Bounds, GetColor());
     }
+
+    private string GetLetter() => Type switch
+    {
+        BallType.Eksamen => "E",
+        BallType.Arbejde => "A",
+        BallType.Foedselsdage => "F",
+        BallType.Soevn => "Z",
+        BallType.Venner => "V",
+        _ => "?"
+    };
 }

@@ -168,8 +168,12 @@ public class Game1 : Game
 
     private void DrawMenu()
     {
-        DrawCentered("BALLS IN THE AIR", 50, Color.Gold);
-        DrawCentered("Hold livets bolde i luften", 70, Color.White);
+        DrawCentered("BALLS IN THE AIR", 30, Color.Gold);
+        DrawCentered("Hold livets bolde i luften", 48, Color.White);
+
+        DrawCentered("E=Eksamen A=Arbejde F=Fødselsdage", 72, Color.LightGray);
+        DrawCentered("Z=Søvn V=Venner", 84, Color.LightGray);
+
         DrawCentered("Piletaster eller A/D", 100, Color.LightGray);
         DrawCentered("Tryk MELLEMRUM", 125, Color.White);
         DrawCentered($"Highscore: {_highscore}", 155, Color.Gold);
