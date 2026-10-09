@@ -12,6 +12,9 @@ public class Game1 : Game
     public const int GameHeight = 180;
     private const int Scale = 4; // hvor mnage gange det forstørres på skærmen 
     private const float BounceSpeed = 180f; // det her er hvor hårdt bolten bliver sendt op, når den rammer spilleren 
+    private const float ShakeDuration = 0.25f; // hvor længe skærmen ryster
+    private const int ShakeStrength = 3; // hvor mange pixels skærmen flytter sig
+    private float _shakeTime; // tiden tilabge
 
     private const float MaxSideSpeed = 100f; // det her er hvor hurtigt bolden flyvr til siden efter et hit
     private Texture2D _pixel; // bruges til firkanterne 
@@ -86,6 +89,9 @@ public class Game1 : Game
 
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds; // tiden fra sidste frame
 
+            if (_shakeTime > 0)
+            _shakeTime -= dt; // kortere for hver frame
+
         switch (_state) // kører den logik der hører til skærmen man er pā
         {
             case GameState.Menu:
@@ -135,6 +141,9 @@ public class Game1 : Game
 
         int missed = _balls.RemoveAll(b => b.Position.Y > GameHeight);
         _lives -= missed;
+
+        if (missed > 0)
+        _shakeTime = ShakeDuration; // starter
 
         if (_balls.Count == 0)
         SpawnBall();
@@ -213,7 +222,17 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(new Color(20, 24, 46));
 
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Matrix.CreateScale(Scale));
+        int shakeX = 0;
+        int shakeY = 0;
+        if (_shakeTime > 0)
+        {
+            shakeX = System.Random.Shared.Next(-ShakeStrength, ShakeStrength + 1);
+            shakeY = System.Random.Shared.Next(-ShakeStrength, ShakeStrength + 1);
+        }
+
+        Matrix transform = Matrix.CreateTranslation(shakeX, shakeY, 0) * Matrix.CreateScale(Scale);
+
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp,transformMatrix: transform);
 
         switch (_state)
         {
@@ -230,6 +249,8 @@ public class Game1 : Game
             DrawGameOver();
             break;
         }
+        if (_shakeTime > 0)
+        _spriteBatch.Draw(_pixel, new Rectangle(0, 0, GameWidth, GameHeight), Color.Red * 0.25f);
         _spriteBatch.End();
         base.Draw(gameTime);
     }
