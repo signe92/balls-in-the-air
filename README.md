@@ -15,7 +15,7 @@ Jeg ville lære C# og spiludvikling ved at bygge et færdigt projekt på 3 dage 
 4. `dotnet run`
 
 # Hvad jeg har lært overall
-- Delta time gør at spillet kører lige hurtigt pa8 alle computere
+- Delta time gør at spillet kører lige hurtigt på alle computere
 - et switch-udtryk er en kort måde at vælge en værdi på ud fra mange muligheder
 
 # Hvad jeg havde svært med overall
