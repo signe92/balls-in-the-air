@@ -193,7 +193,7 @@ public class Game1 : Game
         _player.Draw(_spriteBatch, _pixel);
 
         foreach (Ball ball in _balls)
-        ball.Draw(_spriteBatch, _pixel);
+        ball.Draw(_spriteBatch, _pixel, _font);
 
         _spriteBatch.DrawString(_font, $"Point: {_score}", new Vector2(4, 4), Color.White); // laver point i højre side
 

@@ -52,9 +52,15 @@ public class Ball // klassen her har ansvaret for en bold
         BallType.Foedselsdage => Color.Gold,
         _ => Color.White // betyder alt andet
     };
-    public void Draw(SpriteBatch spriteBatch, Texture2D pixel) // tegner bolden (ændres senere)
+    public void Draw(SpriteBatch spriteBatch, Texture2D pixel, SpriteFont font) // tegner bolden (ændres senere)
     {
         spriteBatch.Draw(pixel, Bounds, GetColor());
+
+        string letter = GetLetter();
+        Vector2 letterSize = font.MeasureString(letter);
+        int x = (int)(Position.X + (Size - letterSize.X) / 2);
+        int y = (int)(Position.Y + (Size - letterSize.Y) / 2);
+        spriteBatch.DrawString(font, letter, new Vector2(x, y), Color.White);
     }
 
     private string GetLetter() => Type switch
