@@ -1,4 +1,6 @@
 # balls in the air
+![Gameplay](docs/gameplay.gif)
+
 Jeg ville lære C# og spiludvikling ved at bygge et færdigt projekt på 3 dage i stedet for kun at følge en tutorial. Idéen kom fra min egen hverdag med studie, arbejde og alt det andet, der skal holdes i luften.
 
 # Sådan spiller du
